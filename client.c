@@ -9,7 +9,7 @@
 
 int main()
 {
-    long long sz;
+    unsigned long long sz;
 
     char buf[1];
     char write_buf[] = "testing writing";
@@ -23,7 +23,7 @@ int main()
 
     for (int i = 0; i <= offset; i++) {
         sz = write(fd, write_buf, strlen(write_buf));
-        printf("Writing to " FIB_DEV ", returned the sequence %lld\n", sz);
+        printf("Writing to " FIB_DEV ", returned the sequence %llu\n", sz);
     }
 
     for (int i = 0; i <= offset; i++) {
@@ -31,7 +31,7 @@ int main()
         sz = read(fd, buf, 1);
         printf("Reading from " FIB_DEV
                " at offset %d, returned the sequence "
-               "%lld.\n",
+               "%llu.\n",
                i, sz);
     }
 
@@ -40,7 +40,7 @@ int main()
         sz = read(fd, buf, 1);
         printf("Reading from " FIB_DEV
                " at offset %d, returned the sequence "
-               "%lld.\n",
+               "%llu.\n",
                i, sz);
     }
 
