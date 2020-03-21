@@ -4,7 +4,7 @@
 
 #include "bignum.h"
 
-bignum_t *bn_create()
+bignum_t *bn_create(void)
 {
     /* Local variable declaration */
     bignum_t *bn_new;
@@ -57,12 +57,16 @@ bignum_t *bn_fibonacci(size_t n)
         return NULL;
 
     /* Allocate bignum_t spaces for initial value F[0] and F[1] */
-    *(bn_fib) = bn_create();      // Allocate F[0]
-    *(bn_fib + 1) = bn_create();  // Allocate F[1]
+    bn_fib[0] = bn_create();  // Allocate F[0]
+    bn_fib[1] = bn_create();  // Allocate F[1]
 
     /* Return NULL while failed allocation*/
-    if (*(bn_fib) == NULL || *(bn_fib + 1) == NULL) {
-        bn_free(bn_fib);
+    if (bn_fib[0] == NULL || bn_fib[1] == NULL) {
+        if (bn_fib[0] != NULL)
+            bn_free(bn_fib[0]);
+        if (bn_fib[1] != NULL)
+            bn_free(bn_fib[1]);
+        free(bn_fib);
         return NULL;
     }
 
@@ -82,11 +86,6 @@ bignum_t *bn_fibonacci(size_t n)
     /* Calculate Fibonacci Number (Start from 2)  */
     for (i = 2; i <= n; i++) {
         bn_fib[i] = bn_add_with_malloc(bn_fib[i - 1], bn_fib[i - 2]);
-        /*printf(
-            "Reading from /dev/fibonacci at offset %zu, returned the sequence ",
-            i);
-        bn_print(bn_fib[i]);
-        printf(".\n");*/
 
         if (i == n)
             ptr_retn = bn_fib[i];  // Return nth sequence

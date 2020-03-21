@@ -1,6 +1,8 @@
 CONFIG_MODULE_SIG = n
 TARGET_MODULE := fibdrv
 
+BIGNUM_DIR := bignum
+
 obj-m := $(TARGET_MODULE).o
 ccflags-y := -std=gnu99 -Wno-declaration-after-statement
 
@@ -9,8 +11,10 @@ PWD := $(shell pwd)
 
 GIT_HOOKS := .git/hooks/applied
 
-all: $(GIT_HOOKS) client
-	$(MAKE) -C $(KDIR) M=$(PWD) modules
+all: $(GIT_HOOKS) bignum client
+	$(MAKE) -I$(PWD)/$(BIGNUM_DIR) -C $(KDIR) M=$(PWD) modules
+
+.PHONY: bignum
 
 $(GIT_HOOKS):
 	@scripts/install-git-hooks
@@ -18,7 +22,7 @@ $(GIT_HOOKS):
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
-	$(RM) client out
+	$(RM) client out ./bignum/bignum.o
 load:
 	sudo insmod $(TARGET_MODULE).ko
 unload:
@@ -26,6 +30,13 @@ unload:
 
 client: client.c
 	$(CC) -o $@ $^
+
+bignum: $(BIGNUM_DIR)/bignum.c
+	@echo "bignum make test...."
+	$(CC) -c -I$(BIGNUM_DIR) -o $(BIGNUM_DIR)/bignum.o $(BIGNUM_DIR)/bignum.c
+
+stch:
+	@echo "MSG"
 
 PRINTF = env printf
 PASS_COLOR = \e[32;01m
@@ -37,5 +48,5 @@ check: all
 	$(MAKE) load
 	sudo ./client > out
 	$(MAKE) unload
-	@diff -u out scripts/expected.txt && $(call pass)
+	@diff -u out bignum/expected.txt && $(call pass)
 	@scripts/verify.py
