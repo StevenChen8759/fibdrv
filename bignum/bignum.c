@@ -37,11 +37,11 @@ bignum_t *bn_create()
     return bn_new;
 }
 
-bignum_t **bn_make_fibonacci(size_t n)
+bignum_t *bn_fibonacci(size_t n)
 {
     /* Declare dynamic array for big number */
     bignum_t **bn_fib;
-    // bnlist_t *ptr_bnl;
+    bignum_t *ptr_retn;
     size_t i;
     // unsigned long long temp;
 
@@ -70,32 +70,35 @@ bignum_t **bn_make_fibonacci(size_t n)
     bn_fib[0]->lsd->value = 0;  // F[0] = 0
     bn_fib[1]->lsd->value = 1;  // F[1] = 1
 
-    printf("Reading from /dev/fibonacci at offset 0, returned the sequence ");
-    bn_print(bn_fib[0]);
-    printf(".\n");
-    printf("Reading from /dev/fibonacci at offset 1, returned the sequence ");
-    bn_print(bn_fib[1]);
-    printf(".\n");
+    // printf("Reading from /dev/fibonacci at offset 0, returned the sequence
+    // ");
+    // bn_print(bn_fib[0]);
+    // printf(".\n");
+    // printf("Reading from /dev/fibonacci at offset 1, returned the sequence
+    // ");
+    // bn_print(bn_fib[1]);
+    // printf(".\n");
 
     /* Calculate Fibonacci Number (Start from 2)  */
     for (i = 2; i <= n; i++) {
         bn_fib[i] = bn_add_with_malloc(bn_fib[i - 1], bn_fib[i - 2]);
-        printf(
+        /*printf(
             "Reading from /dev/fibonacci at offset %zu, returned the sequence ",
             i);
         bn_print(bn_fib[i]);
-        printf(".\n");
+        printf(".\n");*/
+
+        if (i == n)
+            ptr_retn = bn_fib[i];  // Return nth sequence
     }
 
-    for (i = n; i != SIZE_MAX; i--) {
-        printf(
-            "Reading from /dev/fibonacci at offset %zu, returned the sequence ",
-            i);
-        bn_print(bn_fib[i]);
-        printf(".\n");
+    for (i = n - 1; i != SIZE_MAX; i--) {
+        bn_free(bn_fib[i]);
     }
 
-    return bn_fib;
+    free(bn_fib);
+
+    return ptr_retn;
 }
 
 bignum_t *bn_add_with_malloc(bignum_t *src_1, bignum_t *src_2)
@@ -247,7 +250,7 @@ void bn_free(bignum_t *bnum)
 
 int main(int argc, char *argv[])
 {
-    bn_make_fibonacci(100);
+    bn_free(bn_fibonacci(100));
 
     return 0;
 }
