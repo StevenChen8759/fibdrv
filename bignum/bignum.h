@@ -16,8 +16,8 @@ typedef struct {
 /* Create a big number with initialize value zero */
 bignum_t *bn_create();
 
-/* Make fibonacci number array, store with big number structure */
-bignum_t **bn_make_fibonacci(size_t);
+/* Return fibonacci number, store with big number structure */
+bignum_t *bn_fibonacci(size_t);
 
 /* Allocate digit nodes to specific input number */
 void bn_set_digit(bignum_t *, int);
