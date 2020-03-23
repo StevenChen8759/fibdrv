@@ -37,12 +37,12 @@ bignum_t *bn_create(void)
     return bn_new;
 }
 
-bignum_t *bn_fibonacci(size_t n)
+bignum_t *bn_fibonacci(long long n)
 {
     /* Declare dynamic array for big number */
     bignum_t **bn_fib;
     bignum_t *ptr_retn;
-    size_t i;
+    long long i;
     // unsigned long long temp;
 
     /* Return NULL while input is not non-negative value */
@@ -247,9 +247,9 @@ void bn_free(bignum_t *bnum)
     free(bnum);
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     bn_free(bn_fibonacci(100));
 
     return 0;
-}
+}*/

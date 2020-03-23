@@ -20,7 +20,7 @@ typedef struct {
 bignum_t *bn_create(void);
 
 /* Return fibonacci number, store with big number structure */
-bignum_t *bn_fibonacci(size_t);
+bignum_t *bn_fibonacci(long long);
 
 /* Allocate digit nodes to specific input number */
 void bn_set_digit(bignum_t *, int);
