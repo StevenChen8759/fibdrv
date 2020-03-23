@@ -7,7 +7,7 @@
 #include <linux/module.h>
 #include <linux/mutex.h>
 
-#include "bignum/bignum.h"
+// #include "bignum/bignum.h"
 
 MODULE_LICENSE("Dual MIT/GPL");
 MODULE_AUTHOR("National Cheng Kung University, Taiwan");
@@ -19,6 +19,7 @@ MODULE_VERSION("0.1");
 /* MAX_LENGTH is set to 92 because
  * ssize_t can't fit the number > 92
  */
+
 #define MAX_LENGTH 100
 
 static dev_t fib_dev = 0;
@@ -26,9 +27,11 @@ static struct cdev *fib_cdev;
 static struct class *fib_class;
 static DEFINE_MUTEX(fib_mutex);
 
-static unsigned long long fib_sequence(long long k)
+static ktime_t kt;
+
+static unsigned long long fib_sequence_dp_ull(long long k)
 {
-    /* FIXME: use clz/ctz and fast algorithms to speed up */
+    // FIXME: use clz/ctz and fast algorithms to speed up
     unsigned long long f[k + 2];
 
     f[0] = 0;
@@ -39,6 +42,51 @@ static unsigned long long fib_sequence(long long k)
     }
 
     return f[k];
+}
+
+/* Fast doubling implementation of fibonacci sequence */
+static unsigned long long fib_sequence_fd_ull(long long k)
+{
+    unsigned long long t0 = 1, t1 = 1;  // For F[n], F[n+1]
+    unsigned long long t3 = 1, t4 = 0;  // For F[2n], F[2n+1]
+
+    int i = 1;
+
+    if (k <= 0)
+        return 0;
+
+    while (i < k) {
+        if ((i << 1) <= k) {
+            t4 = t1 * t1 + t0 * t0;
+            t3 = t0 * (2 * t1 - t0);
+            t0 = t3;
+            t1 = t4;
+            i = i << 1;
+        } else {
+            t0 = t3;
+            t3 = t4;
+            t4 = t0 + t4;
+            i++;
+        }
+    }
+    return t3;
+}
+
+static unsigned long long fib_time_measure_agent(long long k)
+{
+    unsigned long long result;
+
+    // kt = ktime_get();
+    // Calculate via Dynamic Programming
+    /* result = */ fib_sequence_dp_ull(k);
+    // kt = ktime_sub(ktime_get(), kt);
+
+    // Calculate via Fast Doubling
+    kt = ktime_get();
+    result = fib_sequence_fd_ull(k);
+    kt = ktime_sub(ktime_get(), kt);
+
+    return result;
 }
 
 static int fib_open(struct inode *inode, struct file *file)
@@ -56,14 +104,24 @@ static int fib_release(struct inode *inode, struct file *file)
     return 0;
 }
 
-/* calculate the fibonacci number at given offset */
-static ssize_t fib_read(struct file *file,
-                        char *buf,
-                        size_t size,
-                        loff_t *offset)
+/* calculate the fibonacci number at given offset (in type ull)  */
+static ssize_t fib_read_ull(struct file *file,
+                            char *buf,
+                            size_t size,
+                            loff_t *offset)
 {
-    return (ssize_t) fib_sequence(*offset);
+    // return (ssize_t) fib_sequence_dp_ull(*offset);
+    // return (ssize_t) fib_sequence_fd_ull(*offset);
+    return (ssize_t) fib_time_measure_agent(*offset);
 }
+
+/* */
+/*static ssize_t fib_read_bignum(struct file *file, char *buf, size_t size,
+loff_t *offset){
+
+    buf = (char *) bn_fibonacci(*offset);
+    return 1;
+}*/
 
 /* write operation is skipped */
 static ssize_t fib_write(struct file *file,
@@ -71,7 +129,8 @@ static ssize_t fib_write(struct file *file,
                          size_t size,
                          loff_t *offset)
 {
-    return 1;
+    // printk(KERN_INFO "fib_write input: %s", buf);
+    return ktime_to_ns(kt);
 }
 
 static loff_t fib_device_lseek(struct file *file, loff_t offset, int orig)
@@ -97,9 +156,10 @@ static loff_t fib_device_lseek(struct file *file, loff_t offset, int orig)
     return new_pos;
 }
 
+// Callback assignment
 const struct file_operations fib_fops = {
     .owner = THIS_MODULE,
-    .read = fib_read,
+    .read = fib_read_ull,  // Assign different callback for time perf.
     .write = fib_write,
     .open = fib_open,
     .release = fib_release,
