@@ -20,14 +20,15 @@ MODULE_VERSION("0.1");
  * ssize_t can't fit the number > 92
  */
 
-#define MAX_LENGTH 100
+#define MAX_LENGTH 93
 
 static dev_t fib_dev = 0;
 static struct cdev *fib_cdev;
 static struct class *fib_class;
 static DEFINE_MUTEX(fib_mutex);
 
-static ktime_t kt;
+static ktime_t kt_dp, kt_fd;
+static bool ktime_return_fd;
 
 static unsigned long long fib_sequence_dp_ull(long long k)
 {
@@ -76,15 +77,18 @@ static unsigned long long fib_time_measure_agent(long long k)
 {
     unsigned long long result;
 
-    // kt = ktime_get();
+    kt_dp = ktime_get();
     // Calculate via Dynamic Programming
-    /* result = */ fib_sequence_dp_ull(k);
-    // kt = ktime_sub(ktime_get(), kt);
+    fib_sequence_dp_ull(k);
+    kt_dp = ktime_sub(ktime_get(), kt_dp);
 
     // Calculate via Fast Doubling
-    kt = ktime_get();
+    kt_fd = ktime_get();
     result = fib_sequence_fd_ull(k);
-    kt = ktime_sub(ktime_get(), kt);
+    kt_fd = ktime_sub(ktime_get(), kt_fd);
+
+    // Set to return dynamic programming`s time
+    ktime_return_fd = false;
 
     return result;
 }
@@ -129,8 +133,13 @@ static ssize_t fib_write(struct file *file,
                          size_t size,
                          loff_t *offset)
 {
-    // printk(KERN_INFO "fib_write input: %s", buf);
-    return ktime_to_ns(kt);
+    if (ktime_return_fd) {
+        ktime_return_fd = false;
+        return ktime_to_ns(kt_fd);
+    } else {
+        ktime_return_fd = true;
+        return ktime_to_ns(kt_dp);
+    }
 }
 
 static loff_t fib_device_lseek(struct file *file, loff_t offset, int orig)

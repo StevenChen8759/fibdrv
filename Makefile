@@ -39,6 +39,11 @@ client: client.c $(BIGNUM_DIR)/bignum.o
 stch: stch.c
 	$(CC) -o $@ $^
 
+timeperf: stch
+	sudo ./stch > fibperf.csv
+	gnuplot scripts/fibperf.gp
+	eog fibnum_perf.png
+
 bignum: $(BIGNUM_DIR)/bignum.c
 #	@echo "bignum make test...."
 	$(CC) -c -I$(BIGNUM_DIR) -o $(BIGNUM_DIR)/bignum.o $(BIGNUM_DIR)/bignum.c

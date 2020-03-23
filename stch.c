@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <stdint.h>
 
 #include "bignum/bignum.h"
 
@@ -15,8 +16,8 @@ int main()
     // unsigned long long sz;
 
     char buf[1];
-    char write_buf[] = "testing writing";
-    int offset = 100;
+    char wr_dp[] = "d", wr_fd[] = "f";
+    int offset = 93;
 
     int fd = open(FIB_DEV, O_RDWR);
     if (fd < 0) {
@@ -29,10 +30,13 @@ int main()
 
         lseek(fd, i, SEEK_SET);
         sz = read(fd, buf, 1);
-        printf("F[%d] = %" PRIu64, i, sz);
+        printf("%d, %llu", i, sz);
 
-        sz = write(fd, write_buf, strlen(write_buf));
-        printf(", Time:  %" PRIu64 "\n", sz);
+        sz = write(fd, wr_dp, strlen(wr_dp));
+        printf(", %llu", sz);
+
+        sz = write(fd, wr_fd, strlen(wr_fd));
+        printf(", %llu\n", sz);
     }
 
     return 0;
