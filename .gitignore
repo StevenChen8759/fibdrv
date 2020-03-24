@@ -31,3 +31,5 @@ client
 out
 bn_test
 stch
+fib_timeperf*
+fib_tperf

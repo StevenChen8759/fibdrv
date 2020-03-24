@@ -8,8 +8,8 @@ set grid
 set title 'Fibonacci Number Calculation Performance'
 
 set term png enhanced font 'Verdana,10'
-set output 'fibnum_perf.png'
+set output 'fib_timeperf.png'
 
 plot \
-"fibperf.csv" using 0:3 with linespoints linewidth 2 title "Calculate via Dynamic Programming", \
-"fibperf.csv" using 0:4 with linespoints linewidth 2 title "Calculate via Fast Doubling"
+"fib_timeperf.csv" using 0:3 with linespoints linewidth 2 title "Calculate via Dynamic Programming", \
+"fib_timeperf.csv" using 0:4 with linespoints linewidth 2 title "Calculate via Fast Doubling"
