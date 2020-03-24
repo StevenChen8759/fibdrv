@@ -39,7 +39,7 @@ client: client.c $(BIGNUM_DIR)/bignum.o
 fib_tperf: fib_timeperf.c
 	$(CC) -o $@ $^
 
-timeperf: reload fib_tperf
+timeperf: fib_tperf
 	sudo ./fib_tperf > fib_timeperf.csv
 	gnuplot scripts/fibperf.gp
 	eog fib_timeperf.png
