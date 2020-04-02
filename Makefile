@@ -12,7 +12,7 @@ PWD := $(shell pwd)
 
 GIT_HOOKS := .git/hooks/applied
 
-all: $(GIT_HOOKS) bignum client stch modules
+all: $(GIT_HOOKS) bignum client fib_tperf modules
 
 modules:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
@@ -25,7 +25,7 @@ $(GIT_HOOKS):
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
-	$(RM) client out stch ./bignum/bignum.o
+	$(RM) client out fib_tperf ./bignum/bignum.o
 load:
 	sudo insmod $(TARGET_MODULE).ko
 unload:
@@ -36,13 +36,13 @@ reload: unload load
 client: client.c $(BIGNUM_DIR)/bignum.o
 	$(CC) -o $@ $^
 
-stch: stch.c
+fib_tperf: fib_timeperf.c
 	$(CC) -o $@ $^
 
-timeperf: stch
-	sudo ./stch > fibperf.csv
+timeperf: fib_tperf
+	sudo ./fib_tperf > fib_timeperf.csv
 	gnuplot scripts/fibperf.gp
-	eog fibnum_perf.png
+	eog fib_timeperf.png
 
 bignum: $(BIGNUM_DIR)/bignum.c
 #	@echo "bignum make test...."
